@@ -49,11 +49,31 @@ export default function DetailScreen({ route }) {
 
       const q = query(collection(db, "comments"), where("placeId", "==", place.id));
       const snap = await getDocs(q);
-      const allComments = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      const rawComments = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+      const enriched = await Promise.all(
+        rawComments.map(async comment => {
+          try {
+            const userSnap = await getDocs(
+              query(collection(db, 'users'), where('username', '==', comment.user))
+            );
+            if (!userSnap.empty) {
+              const userData = userSnap.docs[0].data();
+              return {
+                ...comment,
+                userImage: userData.imageUrl || null
+              };
+            }
+          } catch (err) {
+            console.log('โหลด user profile ไม่สำเร็จ:', err);
+          }
+          return { ...comment, userImage: null };
+        })
+      );
 
       const sortedComments = [
-        ...allComments.filter(c => c.user === username),
-        ...allComments.filter(c => c.user !== username)
+        ...enriched.filter(c => c.user === username),
+        ...enriched.filter(c => c.user !== username)
       ];
 
       setComments(sortedComments);
@@ -239,7 +259,14 @@ export default function DetailScreen({ route }) {
         data={comments}
         renderItem={({ item }) => (
           <View style={styles.commentItem}>
-            <Text style={styles.commentUser}>{item.user}:</Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 6 }}>
+              <Image
+                source={item.userImage ? { uri: item.userImage } : require('../assets/user.jpg')}
+                style={styles.avatar}
+              />
+              <Text style={styles.commentUser}>{item.user}</Text>
+            </View>
+
             <View style={{ flexDirection: 'row', marginVertical: 4 }}>
               {[1, 2, 3, 4, 5].map(i => (
                 <FontAwesome
@@ -250,6 +277,7 @@ export default function DetailScreen({ route }) {
                 />
               ))}
             </View>
+
             <Text>{item.text}</Text>
 
             {/* ปุ่มลบรีวิวตัวเอง */}
@@ -328,6 +356,13 @@ const styles = StyleSheet.create({
   nextText: {
     color: '#fff',
     fontWeight: 'bold'
-  }
+  },
+  avatar: {
+  width: 32,
+  height: 32,
+  borderRadius: 16,
+  marginRight: 10,
+  backgroundColor: '#ccc'
+}
   
 });

@@ -43,7 +43,7 @@ export default function MyCommentsScreen() {
   return (
   <View style={styles.container}>
 
-    <Text style={styles.title}>My Comment 💬</Text>
+    <Text style={styles.title}>คอมเมนต์ของฉัน 💬</Text>
 
     <FlatList
       data={comments}

@@ -5,52 +5,65 @@ import { collection, getDocs, query, where } from 'firebase/firestore';
 import { ref, getDownloadURL } from 'firebase/storage';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
+import { onSnapshot } from 'firebase/firestore';
 
 export default function FavoritesScreen() {
   const [favorites, setFavorites] = useState([]);
   const navigation = useNavigation();
 
-  useEffect(() => {
-    const fetchFavorites = async () => {
-      try {
-        const username = await AsyncStorage.getItem('username');
-        if (!username) return;
+useEffect(() => {
+  let unsubscribeLikes;
 
-        // 🔹 ดึง likes ของ user นี้
-        const likeQuery = query(collection(db, 'likes'), where('user', '==', username));
-        const likeSnap = await getDocs(likeQuery);
-        const likedPlaceIds = likeSnap.docs.map(doc => doc.data().placeId); // ✅ เป็น number
+  const fetchRealtimeFavorites = async () => {
+    try {
+      const username = await AsyncStorage.getItem('username');
+      if (!username) return;
+
+      // ตั้ง Listener สำหรับ likes ของ user นี้
+      const likeQuery = query(collection(db, 'likes'), where('user', '==', username));
+      unsubscribeLikes = onSnapshot(likeQuery, async likeSnap => {
+        const likedPlaceIds = likeSnap.docs.map(doc => doc.data().placeId);
 
         if (likedPlaceIds.length === 0) {
           setFavorites([]);
           return;
         }
 
-        // 🔹 ดึงข้อมูลสถานที่ทั้งหมด
-        const placeSnap = await getDocs(collection(db, 'places'));
+        // ดึงสถานที่แบบ snapshot เพื่อให้รองรับ real-time ได้
+        const unsubscribePlaces = onSnapshot(collection(db, 'places'), async placeSnap => {
+          const filtered = await Promise.all(
+            placeSnap.docs
+              .filter(doc => likedPlaceIds.includes(doc.data().id))
+              .map(async doc => {
+                const data = doc.data();
+                const imageRef = ref(storage, `images/${data.picture}`);
+                const imageUrl = await getDownloadURL(imageRef);
+                return {
+                  ...data,
+                  imageUrl
+                };
+              })
+          );
 
-        const filtered = await Promise.all(
-          placeSnap.docs
-            .filter(doc => likedPlaceIds.includes(doc.data().id)) // ✅ เช็คจาก data().id (number)
-            .map(async doc => {
-              const data = doc.data();
-              const imageRef = ref(storage, `images/${data.picture}`);
-              const imageUrl = await getDownloadURL(imageRef);
-              return {
-                ...data,
-                imageUrl
-              };
-            })
-        );
+          setFavorites(filtered);
+        });
 
-        setFavorites(filtered);
-      } catch (error) {
-        console.error('เกิดข้อผิดพลาดในการโหลด Fev:', error);
-      }
-    };
+        // คืน unsubscribe สำหรับ place เมื่อ component ถูก unmount
+        return () => unsubscribePlaces();
+      });
+    } catch (error) {
+      console.error('เกิดข้อผิดพลาดในการโหลด Fev แบบ real-time:', error);
+    }
+  };
 
-    fetchFavorites();
-  }, []);
+  fetchRealtimeFavorites();
+
+  // คืน unsubscribe ของ likes เมื่อ component ถูก unmount
+  return () => {
+    if (unsubscribeLikes) unsubscribeLikes();
+  };
+}, []);
+
 
   const renderItem = ({ item }) => (
     <TouchableOpacity onPress={() => navigation.navigate("DetailScreen", { place: item })}>

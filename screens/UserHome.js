@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, Image, StyleSheet,TouchableOpacity } from 'react-native';
+import { View, Text, FlatList, Image, StyleSheet,TouchableOpacity,TextInput } from 'react-native';
 import { db, storage } from '../firebaseConfig';
 import { collection, getDocs, query, where } from 'firebase/firestore';
 import { ref, getDownloadURL } from 'firebase/storage';
@@ -9,34 +9,60 @@ export default function UserHome() {
   const [places, setPlaces] = useState([]);
   const navigation = useNavigation();
   const [username, setUsername] = useState('');
+  const [searchText, setSearchText] = useState('');
+  const [filteredPlaces, setFilteredPlaces] = useState([]);
 
   useEffect(() => {
     const fetchPlaces = async () => {
-      try {
-        const snapshot = await getDocs(collection(db, 'places'));
-        const items = await Promise.all(
-          snapshot.docs.map(async doc => {
-            const data = doc.data();
-            const id = doc.id;
+  try {
+    const snapshot = await getDocs(collection(db, 'places'));
 
-            // ดึง URL ของรูปจาก Firebase Storage
-            const imageRef = ref(storage, `images/${data.picture}`);
-            const imageUrl = await getDownloadURL(imageRef);
+    const items = await Promise.all(
+      snapshot.docs.map(async doc => {
+        const data = doc.data();
+        const id = data.id; 
 
-            return {
-              ...data,
-              imageUrl
-            };
-          })
+        const imageRef = ref(storage, `images/${data.picture}`);
+        const imageUrl = await getDownloadURL(imageRef);
+
+        const commentsSnap = await getDocs(
+          query(collection(db, 'comments'), where('placeId', '==', id))
         );
-        setPlaces(items);
-      } catch (error) {
-        console.error('เกิดข้อผิดพลาดในการโหลด:', error);
-      }
-    };
+
+        const comments = commentsSnap.docs.map(doc => doc.data());
+        
+        const ratings = commentsSnap.docs
+          .map(doc => doc.data().rating)
+          .filter(r => typeof r === 'number' && !isNaN(r));
+
+        const avgRating = ratings.length
+          ? ratings.reduce((a, b) => a + b, 0) / ratings.length
+          : 0;
+
+        return {
+          ...data,
+          imageUrl,
+          avgRating,
+          commentCount: comments.length
+        };
+      })
+    );
+    const sortedItems = items.sort((a, b) => b.commentCount - a.commentCount);
+    setPlaces(items);
+  } catch (error) {
+    console.error('เกิดข้อผิดพลาดในการโหลด:', error);
+  }
+};
 
     fetchPlaces();
   }, []);
+
+  useEffect(() => {
+      const filtered = places.filter(place =>
+        place.name.toLowerCase().includes(searchText.toLowerCase())
+      );
+      setFilteredPlaces(filtered);
+    }, [searchText, places]);
 
   const renderItem = ({ item }) => (
     <TouchableOpacity onPress={() => navigation.navigate("DetailScreen", { place: item })}>
@@ -44,6 +70,7 @@ export default function UserHome() {
         <Image source={{ uri: item.imageUrl }} style={styles.image} />
         <View style={styles.info}>
           <Text style={styles.name}>{item.name}</Text>
+          <Text style={styles.rating}>⭐ {item.avgRating.toFixed(1)}</Text>
           <Text style={styles.time}>{item.time}</Text>
         </View>
       </View>
@@ -53,11 +80,18 @@ export default function UserHome() {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-      <Text style={styles.headerText}>🏠 Home</Text>
+      <Text style={styles.headerText}>🏠 หน้าหลัก</Text>
       </View>
-      <Text> Recommend Place</Text>
+      <Text>สถานที่ท่องเที่ยวแนะนำ</Text>
+      
+      <TextInput
+        placeholder="ค้นหาสถานที่..."
+        value={searchText}
+        onChangeText={setSearchText}
+        style={styles.searchInput}
+      />
       <FlatList
-        data={places}
+        data={filteredPlaces}
         keyExtractor={(item, index) => index.toString()}
         renderItem={renderItem}
         contentContainerStyle={{ padding: 10 }}
@@ -111,6 +145,21 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     color: '#fff'
-  }
-  
+  },
+  rating: {
+  fontSize: 14,
+  color: '#555',
+  marginTop: 3
+},
+searchInput: {
+  borderWidth: 1,
+  borderColor: '#ccc',
+  borderRadius: 10,
+  paddingHorizontal: 15,
+  paddingVertical: 8,
+  marginHorizontal: 10,
+  marginBottom: 10,
+  backgroundColor: '#fff'
+}
+
 });

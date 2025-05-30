@@ -13,13 +13,12 @@ import DetailScreen from'./screens/DetailScreen';
 import AdminDetailScreen from'./screens/AdminDetailScreen';
 import AdminInsertScreen from './screens/AdminInsertScreen';
 import EditProfileScreen from './screens/EditProfileScreen';
+import MyCommentScreen from './screens/MyCommentsScreen';
 
 import AdminUserScreen from './screens/AdminUserScreen';
 import AdminUserHomeScreen from './screens/AdminUserHomeScreen';
 import AdminUserCommentsScreen from './screens/AdminUserCommentsScreen';
 import AdminAllUserCommentsScreen from './screens/AdminAllUserCommentsScreen';
-
-import MyCommentScreen from './screens/MyCommentsScreen';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -42,13 +41,12 @@ export default function App() {
         <Stack.Screen name="AdminDetailScreen" component={AdminDetailScreen} />
         <Stack.Screen name="AdminInsertScreen" component={AdminInsertScreen} />
         <Stack.Screen name="EditProfile" component={EditProfileScreen} />
+        <Stack.Screen name="MyCommentScreen" component={MyCommentScreen} />
 
         <Stack.Screen name="AdminUserScreen" component={AdminUserScreen} />
         <Stack.Screen name="AdminUserHomeScreen" component={AdminUserHomeScreen} />
         <Stack.Screen name="AdminUserCommentsScreen" component={AdminUserCommentsScreen} />
         <Stack.Screen name="AdminAllUserCommentsScreen" component={AdminAllUserCommentsScreen} />
-
-        <Stack.Screen name="MyCommentScreen" component={MyCommentScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );
