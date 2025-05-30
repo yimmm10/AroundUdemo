@@ -1,0 +1,96 @@
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
+import { db } from '../firebaseConfig';
+import { collection, query, where, getDocs } from 'firebase/firestore';
+import { useRoute, useNavigation } from '@react-navigation/native';
+
+export default function AdminUserCommentsScreen() {
+  const [comments, setComments] = useState([]);
+  const route = useRoute();
+  const navigation = useNavigation();
+  const { userId } = route.params;
+
+  useEffect(() => {
+    const fetchComments = async () => {
+      try {
+        // ดึงข้อมูลคอมเมนต์โดยกรองจาก userId
+        const q = query(collection(db, "comments"), where("userId", "==", userId));
+        const querySnapshot = await getDocs(q);
+        const commentsData = querySnapshot.docs
+          .map(doc => {
+            const data = doc.data();
+            if (!data) return null; // ป้องกันข้อมูลว่าง
+            return { id: doc.id, ...data };
+          })
+          .filter(item => item !== null); // กรองข้อมูลที่เป็น null ออก
+        console.log('Fetched comments:', commentsData); // debug ดูข้อมูลที่ได้
+        setComments(commentsData);
+      } catch (error) {
+        console.error('Error fetching comments:', error);
+      }
+    };
+
+    fetchComments();
+  }, [userId]);
+
+  const renderItem = ({ item }) => (
+    <View style={styles.card}>
+      {/* แสดง username ถ้ามี */}
+      {item.username && <Text style={styles.username}>User: {item.username}</Text>}
+      <Text style={styles.commentText}>{item.comment || item.text}</Text>
+    </View>
+  );
+
+  const handleGoBack = () => {
+    navigation.goBack();
+  };
+
+  return (
+    <View style={styles.container}>
+      <Text style={styles.header}>User's Comments</Text>
+      <FlatList
+        data={comments}
+        keyExtractor={item => (item && item.id ? item.id : Math.random().toString())}
+        renderItem={renderItem}
+        ListEmptyComponent={<Text>No comments found.</Text>}
+      />
+      <TouchableOpacity onPress={handleGoBack} style={styles.backButton}>
+        <Text style={styles.backButtonText}>Back to Users</Text>
+      </TouchableOpacity>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: { flex: 1, backgroundColor: '#fdfdfd', padding: 20 },
+  header: { fontSize: 22, fontWeight: 'bold', marginBottom: 20 },
+  backButton: {
+    backgroundColor: '#c76b4d',
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginTop: 20,
+  },
+  backButtonText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
+  card: {
+    backgroundColor: '#fff',
+    padding: 15,
+    borderRadius: 10,
+    marginBottom: 10,
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
+    elevation: 3,
+  },
+  username: {
+    fontWeight: 'bold',
+    marginBottom: 5,
+    color: '#555',
+  },
+  commentText: { fontSize: 16, color: '#333' },
+});

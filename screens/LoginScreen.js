@@ -1,4 +1,4 @@
-import React , { useState } from 'react';
+import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, Alert } from 'react-native';
 import { collection, query, where, getDocs } from 'firebase/firestore';
 import { db } from '../firebaseConfig';
@@ -34,16 +34,17 @@ export default function LoginScreen({ navigation }) {
 
       // เช็ค role
       if (userData.role === "admin") {
-        navigation.replace("AdminScreen");
+        navigation.replace("AdminUserHomeScreen"); // นำทางไปยังหน้า AdminUseHomeScreen
       } else if (userData.role === "user") {
         navigation.replace("SplashScreen");
       } else {
         Alert.alert("บทบาทไม่ถูกต้อง");
       }
 
-    await AsyncStorage.setItem('isLoggedIn', 'true');
-    await AsyncStorage.setItem('userRole', userData.role);
-    await AsyncStorage.setItem('username', userData.username); 
+      // บันทึกข้อมูลลง AsyncStorage
+      await AsyncStorage.setItem('isLoggedIn', 'true');
+      await AsyncStorage.setItem('userRole', userData.role);
+      await AsyncStorage.setItem('username', userData.username); 
 
     } catch (error) {
       Alert.alert("เกิดข้อผิดพลาด", error.message);

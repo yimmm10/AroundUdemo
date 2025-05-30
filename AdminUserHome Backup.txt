@@ -1,0 +1,165 @@
+import React, { useState } from 'react';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+export default function AdminUserHome({ navigation }) {
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const handlePlacePress = () => {
+    navigation.navigate('AdminScreen'); // ไปหน้าสถานที่
+  };
+
+  const handleUserPress = () => {
+    navigation.navigate('AdminUserScreen'); // หน้านี้เอง หรือเปลี่ยนเป็นหน้าอื่นถ้ามี
+  };
+
+  const handleReviewPress = () => {
+    navigation.navigate('AdminUserCommentsScreen'); // หน้าคอมเม้นท์/รีวิว
+  };
+
+  const handleLogout = async () => {
+    try {
+      await AsyncStorage.removeItem('userToken'); // ลบ Token ออกจาก AsyncStorage
+      navigation.replace('Login'); // นำทางไปหน้า Login ใช้ replace เพื่อป้องกันกลับมาหน้าเดิม
+    } catch (error) {
+      console.error('Error during logout:', error);
+      Alert.alert('Logout Failed', 'There was an error logging out.');
+    }
+  };
+
+  return (
+    <View style={styles.container}>
+      {/* Header */}
+      <View style={styles.header}>
+        <Text style={styles.helloText}>Hello!</Text>
+        {/* เปลี่ยนจาก <Text style={styles.self}></Text> เป็น '' หรือเอาออก */}
+        <Text style={styles.title}>
+          AROUND <Text style={styles.u}>U</Text>
+        </Text>
+        <Text style={styles.email}>Admin@gmail.com</Text>
+      </View>
+
+      {/* Search */}
+      <TextInput
+        style={styles.searchInput}
+        placeholder="Search..."
+        value={searchQuery}
+        onChangeText={setSearchQuery}
+      />
+
+      {/* Buttons */}
+      <View style={styles.buttonsContainer}>
+        <TouchableOpacity style={styles.button} onPress={handlePlacePress}>
+          <Text style={styles.buttonText}>PLACE</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.button} onPress={handleUserPress}>
+          <Text style={styles.buttonText}>USER</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.button} onPress={handleReviewPress}>
+          <Text style={styles.buttonText}>REVIEW</Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* Bottom Tab Bar */}
+      <View style={styles.bottomTabBar}>
+        <TouchableOpacity style={styles.tabButton} onPress={() => navigation.navigate('AdminAllUserCommentsScreen')}>
+          <Text style={styles.tabText}>💬</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.tabButton} onPress={() => navigation.navigate('AdminScreen')}>
+          <Text style={styles.tabText}>📍</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.tabButton} onPress={() => navigation.navigate('AdminUserScreen')}>
+          <Text style={styles.tabText}>👤</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.tabButton} onPress={handleLogout}>
+          <Text style={styles.tabText}>🚪</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: { flex: 1, backgroundColor: '#fff' },
+  header: {
+    backgroundColor: '#f4cf9d',
+    paddingVertical: 20,
+    paddingHorizontal: 15,
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
+    alignItems: 'flex-start',
+  },
+  helloText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
+  title: {
+    fontWeight: '900',
+    fontSize: 30,
+    color: '#333',
+  },
+  u: {
+    color: '#ea7216',
+  },
+  self: {
+    fontSize: 16,
+    color: '#ea2316',
+    fontWeight: 'bold',
+    fontStyle: 'italic',
+  },
+  email: {
+    color: '#000',
+    fontSize: 14,
+    marginTop: 5,
+  },
+  searchInput: {
+    marginTop: 20,
+    marginHorizontal: 20,
+    borderWidth: 1,
+    borderColor: '#bbb',
+    borderRadius: 25,
+    paddingHorizontal: 15,
+    height: 40,
+  },
+  buttonsContainer: {
+    marginTop: 30,
+    alignItems: 'center',
+  },
+  button: {
+    backgroundColor: '#999',
+    width: 220,
+    height: 50,
+    marginVertical: 10,
+    borderRadius: 25,
+    justifyContent: 'center',
+    alignItems: 'center',
+    opacity: 0.6,
+  },
+  buttonText: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#fff',
+  },
+  bottomTabBar: {
+    height: 60,
+    backgroundColor: '#f4cf9d',
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'center',
+    position: 'absolute',
+    bottom: 0,
+    width: '100%',
+    borderTopLeftRadius: 15,
+    borderTopRightRadius: 15,
+  },
+  tabButton: {
+    padding: 10,
+  },
+  tabText: {
+    fontSize: 26,
+    color: '#900',
+  },
+});
