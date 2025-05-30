@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useLayoutEffect } from 'react';
-import { View, Text, Image, TextInput, TouchableOpacity, StyleSheet, FlatList, ScrollView } from 'react-native';
+import { View, Text, Image, TextInput, TouchableOpacity, StyleSheet, FlatList, ScrollView, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { db, storage } from '../firebaseConfig';
@@ -11,13 +11,15 @@ export default function DetailScreen({ route }) {
   const { place } = route.params;
   const navigation = useNavigation();
   const [imageUrl, setImageUrl] = useState(null);
-  const [liked, setLiked] = useState(false);
   const [comment, setComment] = useState('');
   const [rating, setRating] = useState(0);
   const [comments, setComments] = useState([]);
   const [averageRating, setAverageRating] = useState(0);
   const [currentUsername, setCurrentUsername] = useState('');
   const [isLiked, setIsLiked] = useState(false);
+  const [editingCommentId, setEditingCommentId] = useState(null);
+  const [isEditing, setIsEditing] = useState(false);
+
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -48,7 +50,13 @@ export default function DetailScreen({ route }) {
       const q = query(collection(db, "comments"), where("placeId", "==", place.id));
       const snap = await getDocs(q);
       const allComments = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      setComments(allComments);
+
+      const sortedComments = [
+        ...allComments.filter(c => c.user === username),
+        ...allComments.filter(c => c.user !== username)
+      ];
+
+      setComments(sortedComments);
 
       // คำนวณคะแนนเฉลี่ย
       const allRatings = snap.docs
@@ -85,49 +93,62 @@ export default function DetailScreen({ route }) {
   }, []);
 
   const handleAddComment = async () => {
-    if (!comment || rating === 0) return;
+  if (!comment || rating === 0) return;
 
-    const q = query(
-      collection(db, "comments"),
-      where("placeId", "==", place.id),
-      where("user", "==", currentUsername)
+  if (editingCommentId) {
+    // 🟡 กำลังแก้ไข
+    const reviewRef = doc(db, "comments", editingCommentId);
+
+    await setDoc(reviewRef, {
+      placeId: place.id,
+      text: comment,
+      rating,
+      user: currentUsername,
+      createdAt: new Date()
+    });
+
+    setComments(prev =>
+      prev.map(c =>
+        c.id === editingCommentId ? { ...c, text: comment, rating } : c
+      )
     );
-    const snap = await getDocs(q);
 
-    if (!snap.empty) {
-      // มีแล้ว แก้ไขรีวิวเดิม
-      const existingReviewId = snap.docs[0].id;
-      const reviewRef = doc(db, "comments", existingReviewId);
-
-      await setDoc(reviewRef, {
-        placeId: place.id,
-        text: comment,
-        rating,
-        user: currentUsername,
-        createdAt: new Date()
-      });
-
-      setComments((prev) =>
-        prev.map((c) =>
-          c.user === currentUsername ? { ...c, text: comment, rating } : c
-        )
-      );
-    } else {
-      // เพิ่มรีวิวใหม่
-      const newReview = {
-        placeId: place.id,
-        text: comment,
-        rating,
-        user: currentUsername,
-        createdAt: new Date()
-      };
-      const docRef = await addDoc(collection(db, "comments"), newReview);
-      setComments([...comments, { id: docRef.id, ...newReview }]);
-    }
-
+    setEditingCommentId(null); 
+    setIsEditing(false);
     setComment('');
     setRating(0);
+    return;
+  }
+
+  // 🔴 ตรวจว่าคอมเมนต์ซ้ำ
+  const q = query(
+    collection(db, "comments"),
+    where("placeId", "==", place.id),
+    where("user", "==", currentUsername)
+  );
+  const snap = await getDocs(q);
+
+  if (!snap.empty) {
+    Alert.alert("แจ้งเตือน", "คุณสามารถคอมเมนต์ได้เพียงครั้งเดียวต่อสถานที่\nกรุณาใช้ปุ่มแก้ไขเพื่อแก้ไขความคิดเห็น");
+    return;
+  }
+
+  // ✅ เพิ่มรีวิวใหม่
+  const newReview = {
+    placeId: place.id,
+    text: comment,
+    rating,
+    user: currentUsername,
+    createdAt: new Date()
   };
+  const docRef = await addDoc(collection(db, "comments"), newReview);
+  setComments([{ id: docRef.id, ...newReview }, ...comments]);
+  setComment('');
+  setRating(0);
+  setIsEditing(false);
+};
+
+
 
   const handleDeleteComment = async (item) => {
     try {
@@ -233,12 +254,23 @@ export default function DetailScreen({ route }) {
 
             {/* ปุ่มลบรีวิวตัวเอง */}
             {item.user === currentUsername && (
-              <TouchableOpacity
-                style={styles.deleteBtn}
-                onPress={() => handleDeleteComment(item)}
-              >
-                <Text style={{ color: 'red' }}>ลบ</Text>
-              </TouchableOpacity>
+              <View style={{ flexDirection: 'row', justifyContent: 'flex-end', marginTop: 6 }}>
+                <TouchableOpacity
+                  style={{ marginRight: 10 }}
+                  onPress={() => {
+                    setComment(item.text);
+                    setRating(item.rating);
+                    setEditingCommentId(item.id);
+                    
+                  }}
+                >
+                  <Text style={{ color: '#007bff' }}>แก้ไข</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity onPress={() => handleDeleteComment(item)}>
+                  <Text style={{ color: 'red' }}>ลบ</Text>
+                </TouchableOpacity>
+              </View>
             )}
           </View>
         )}

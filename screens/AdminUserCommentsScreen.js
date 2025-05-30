@@ -22,12 +22,29 @@ export default function AdminUserCommentsScreen() {
 
   const fetchComments = async () => {
     try {
+      // 🔹 ดึงสถานที่ทั้งหมด แล้ว map จาก data().id → name
+      const placesSnap = await getDocs(collection(db, "places"));
+      const placeMap = {};
+      placesSnap.forEach(doc => {
+        const data = doc.data();
+        if (data.id !== undefined && data.name) {
+          placeMap[String(data.id).trim()] = data.name;
+        }
+      });
+  
+      // 🔹 ดึง comments ของ user คนนี้
       const q = query(collection(db, "comments"), where("user", "==", user));
       const querySnapshot = await getDocs(q);
-      const data = querySnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      }));
+      const data = querySnapshot.docs.map(doc => {
+        const commentData = doc.data();
+        const placeName = placeMap[String(commentData.placeId)] || "Unknown";
+        return {
+          id: doc.id,
+          ...commentData,
+          placeName // 🔥 เพิ่มชื่อสถานที่เข้าไป
+        };
+      });
+  
       setComments(data);
     } catch (error) {
       console.error('Error fetching comments:', error);
@@ -70,7 +87,10 @@ export default function AdminUserCommentsScreen() {
 
   const renderItem = ({ item }) => (
     <View style={styles.card}>
-      <Text style={styles.commentText}>{item.text}</Text>
+      <Text style={styles.commentText}>Place: {item.placeName}</Text>
+
+      <Text style={styles.commentText}>Comment: {item.text}</Text>
+      
       <View style={styles.actionRow}>
         <TouchableOpacity style={styles.editButton} onPress={() => handleEdit(item)}>
           <Text style={styles.actionText}>Edit</Text>

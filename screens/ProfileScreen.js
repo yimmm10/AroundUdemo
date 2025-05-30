@@ -20,6 +20,19 @@ export default function ProfileScreen({ navigation }) {
     fetchUser();
   }, []);
 
+  const handleLogout = async () => {
+    Alert.alert("ยืนยัน", "คุณต้องการออกจากระบบหรือไม่?", [
+      { text: "ยกเลิก", style: "cancel" },
+      {
+        text: "ออกจากระบบ",
+        style: "destructive",
+        onPress: async () => {
+          await AsyncStorage.clear();
+          navigation.replace("Login");
+        }
+      }
+    ]);
+  };
 
   if (!userData) return <Text style={{ textAlign: 'center', marginTop: 40 }}>Loading...</Text>;
 
@@ -40,19 +53,23 @@ export default function ProfileScreen({ navigation }) {
           </TouchableOpacity>
         </View>
 
-        <Text style={styles.label}>Email</Text>
-        <Text style={styles.value}>{userData.email}</Text>
-
         <Text style={styles.label}>Username</Text>
         <Text style={styles.value}>{userData.username}</Text>
 
-        <Text style={styles.label}>Password</Text>
-        <Text style={styles.value}>********</Text>
-      </View>
+        <Text style={styles.label}>Email</Text>
+        <Text style={styles.value}>{userData.email}</Text>
 
-              <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
-                <Text style={styles.backText}>BACK</Text>
-              </TouchableOpacity>
+      </View>
+      <TouchableOpacity
+        style={styles.commentBtn}
+        onPress={() => navigation.navigate('MyCommentScreen')}
+      >
+        <Text style={styles.commentBtnText}>View my comments 💬</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity onPress={handleLogout} style={styles.logoutBtn}>
+        <Text style={styles.logoutText}>Logout</Text>
+      </TouchableOpacity>
     </ScrollView>
   );
 }
@@ -60,8 +77,7 @@ export default function ProfileScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     alignItems: 'center',
-    padding: 20,
-    backgroundColor: '#fff',
+    padding: 20
   },
   avatar: {
     width: 140,
@@ -111,5 +127,18 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontWeight: 'bold',
     fontSize: 16
-  }
+  },
+  commentBtn: {
+  marginTop: 20,
+  backgroundColor: '#4da6ff',
+  paddingVertical: 12,
+  paddingHorizontal: 30,
+  borderRadius: 20
+},
+commentBtnText: {
+  color: '#fff',
+  fontWeight: 'bold',
+  fontSize: 16
+},
+
 });

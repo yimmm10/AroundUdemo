@@ -1,9 +1,8 @@
-// AdminInsertScreen.js
 import React, { useState } from 'react';
 import { View, Text, TextInput, StyleSheet, TouchableOpacity, Alert, Image } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { db, storage } from '../firebaseConfig';
-import { collection, addDoc } from 'firebase/firestore';
+import { collection, getDocs, addDoc } from 'firebase/firestore';
 import { ref, uploadBytes } from 'firebase/storage';
 
 export default function AdminInsertScreen({ navigation }) {
@@ -16,7 +15,7 @@ export default function AdminInsertScreen({ navigation }) {
   const pickImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      quality: 1, // Set to 1 for highest quality
+      quality: 1,
     });
 
     if (!result.canceled) {
@@ -43,7 +42,25 @@ export default function AdminInsertScreen({ navigation }) {
         pictureFileName = imageFileName;
       }
 
-      await addDoc(collection(db, "places"), {
+      // ✅ คำนวณ id ใหม่ (ไม่ซ้ำ)
+      const placesRef = collection(db, "places");
+      const snapshot = await getDocs(placesRef);
+      const usedIds = snapshot.docs
+        .map(doc => doc.data().id)
+        .filter(id => typeof id === 'number')
+        .sort((a, b) => a - b);
+
+      let newId = 1;
+      for (let i = 0; i < usedIds.length; i++) {
+        if (usedIds[i] !== i + 1) {
+          newId = i + 1;
+          break;
+        }
+        newId = usedIds.length + 1;
+      }
+
+      await addDoc(placesRef, {
+        id: newId,
         name,
         description,
         time,
@@ -54,7 +71,7 @@ export default function AdminInsertScreen({ navigation }) {
       navigation.goBack();
     } catch (error) {
       console.error("Upload Error:", error);
-      Alert.alert("เกิดข้อผิดพลาด", "ไม่สามารถอัพโหลดรูปภาพได้");
+      Alert.alert("เกิดข้อผิดพลาด", "ไม่สามารถเพิ่มข้อมูลได้");
     }
   };
 
@@ -69,20 +86,16 @@ export default function AdminInsertScreen({ navigation }) {
       <Text style={styles.label}>เวลาเปิด/ปิด</Text>
       <TextInput style={styles.input} value={time} onChangeText={setTime} />
 
-      {/* Image selection button */}
       <TouchableOpacity style={styles.imagePicker} onPress={pickImage}>
         <Text style={{ color: '#fff' }}>{image ? 'เปลี่ยนรูปภาพ' : 'เลือกรูปภาพ'}</Text>
       </TouchableOpacity>
 
-      {/* Display selected image */}
       {image && <Image source={{ uri: image }} style={styles.preview} />}
 
-      {/* Save button to submit the data */}
       <TouchableOpacity style={styles.saveBtn} onPress={handleInsert}>
         <Text style={{ color: '#fff', fontWeight: 'bold' }}>บันทึกสถานที่</Text>
       </TouchableOpacity>
 
-      {/* Back button */}
       <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
         <Text style={styles.backText}>BACK</Text>
       </TouchableOpacity>
@@ -110,6 +123,7 @@ const styles = StyleSheet.create({
     padding: 15,
     borderRadius: 10,
     marginTop: 20,
-    alignItems: 'center' },
+    alignItems: 'center'
+  },
   backText: { color: '#fff' },
 });

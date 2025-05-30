@@ -19,6 +19,8 @@ import AdminUserHomeScreen from './screens/AdminUserHomeScreen';
 import AdminUserCommentsScreen from './screens/AdminUserCommentsScreen';
 import AdminAllUserCommentsScreen from './screens/AdminAllUserCommentsScreen';
 
+import MyCommentScreen from './screens/MyCommentsScreen';
+
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
@@ -45,6 +47,8 @@ export default function App() {
         <Stack.Screen name="AdminUserHomeScreen" component={AdminUserHomeScreen} />
         <Stack.Screen name="AdminUserCommentsScreen" component={AdminUserCommentsScreen} />
         <Stack.Screen name="AdminAllUserCommentsScreen" component={AdminAllUserCommentsScreen} />
+
+        <Stack.Screen name="MyCommentScreen" component={MyCommentScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

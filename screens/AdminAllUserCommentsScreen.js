@@ -6,27 +6,50 @@ import { db } from '../firebaseConfig';
 import { collection, getDocs, doc, deleteDoc, updateDoc } from 'firebase/firestore';
 import { useNavigation } from '@react-navigation/native';
 
-export default function AdminUserCommentsScreen() {
+export default function AdminAllUserCommentsScreen() {
   const [comments, setComments] = useState([]);
-  const [editingComment, setEditingComment] = useState(null); // เก็บคอมเมนต์ที่กำลังแก้ไข
+  const [filteredComments, setFilteredComments] = useState([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [placesMap, setPlacesMap] = useState({});
+  const [editingComment, setEditingComment] = useState(null);
   const [editText, setEditText] = useState('');
   const navigation = useNavigation();
 
   useEffect(() => {
-    fetchComments();
+    fetchPlacesAndComments();
   }, []);
 
-  const fetchComments = async () => {
+  const fetchPlacesAndComments = async () => {
     try {
-      const querySnapshot = await getDocs(collection(db, "comments"));
-      const data = querySnapshot.docs.map(doc => ({
+      const placesSnap = await getDocs(collection(db, 'places'));
+      const map = {};
+      placesSnap.forEach(doc => {
+        const data = doc.data();
+        if (data.id !== undefined && data.name) {
+          map[String(data.id).trim()] = data.name;
+        }
+      });
+      setPlacesMap(map);
+
+      const commentsSnap = await getDocs(collection(db, 'comments'));
+      const data = commentsSnap.docs.map(doc => ({
         id: doc.id,
         ...doc.data()
       }));
+
       setComments(data);
+      setFilteredComments(data); // สำหรับการค้นหา
     } catch (error) {
-      console.error('Error fetching comments:', error);
+      console.error('Error fetching comments or places:', error);
     }
+  };
+
+  const handleSearch = (text) => {
+    setSearchQuery(text);
+    const filtered = comments.filter(comment =>
+      comment.text?.toLowerCase().includes(text.toLowerCase())
+    );
+    setFilteredComments(filtered);
   };
 
   const confirmDelete = (id) => {
@@ -39,7 +62,9 @@ export default function AdminUserCommentsScreen() {
   const deleteComment = async (id) => {
     try {
       await deleteDoc(doc(db, 'comments', id));
-      setComments(prev => prev.filter(item => item.id !== id));
+      const updated = comments.filter(item => item.id !== id);
+      setComments(updated);
+      setFilteredComments(updated);
     } catch (error) {
       console.error('Error deleting comment:', error);
     }
@@ -55,7 +80,13 @@ export default function AdminUserCommentsScreen() {
     try {
       const commentRef = doc(db, 'comments', editingComment.id);
       await updateDoc(commentRef, { text: editText });
-      setComments(prev => prev.map(item => item.id === editingComment.id ? { ...item, text: editText } : item));
+
+      const updated = comments.map(item =>
+        item.id === editingComment.id ? { ...item, text: editText } : item
+      );
+
+      setComments(updated);
+      setFilteredComments(updated);
       setEditingComment(null);
       setEditText('');
     } catch (error) {
@@ -66,7 +97,8 @@ export default function AdminUserCommentsScreen() {
   const renderItem = ({ item }) => (
     <View style={styles.card}>
       {item.user && <Text style={styles.username}>User: {item.user}</Text>}
-      <Text style={styles.commentText}>{item.text}</Text>
+      <Text style={styles.commentText}>Place: {placesMap[item.placeId] || 'Unknown'}</Text>
+      <Text style={styles.commentText}>Comment: {item.text}</Text>
       <View style={styles.actionRow}>
         <TouchableOpacity style={styles.editButton} onPress={() => handleEdit(item)}>
           <Text style={styles.actionText}>Edit</Text>
@@ -81,8 +113,16 @@ export default function AdminUserCommentsScreen() {
   return (
     <View style={styles.container}>
       <Text style={styles.header}>All Users' Comments</Text>
+
+      <TextInput
+        placeholder="Search comments..."
+        style={styles.searchInput}
+        value={searchQuery}
+        onChangeText={handleSearch}
+      />
+
       <FlatList
-        data={comments}
+        data={filteredComments}
         keyExtractor={item => item.id}
         renderItem={renderItem}
         ListEmptyComponent={<Text>No comments found.</Text>}
@@ -92,7 +132,6 @@ export default function AdminUserCommentsScreen() {
         <Text style={styles.backButtonText}>Back</Text>
       </TouchableOpacity>
 
-      {/* Modal แก้ไขข้อความ */}
       <Modal visible={!!editingComment} animationType="slide" transparent>
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
@@ -120,7 +159,14 @@ export default function AdminUserCommentsScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#fff', padding: 20 },
-  header: { fontSize: 22, fontWeight: 'bold', marginBottom: 20 },
+  header: { fontSize: 22, fontWeight: 'bold', marginBottom: 10 },
+  searchInput: {
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 8,
+    padding: 10,
+    marginBottom: 15,
+  },
   card: {
     backgroundColor: '#f2f2f2',
     padding: 15,

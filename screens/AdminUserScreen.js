@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, TextInput } from 'react-native';
 import { db } from '../firebaseConfig';
 import { collection, getDocs } from 'firebase/firestore';
 import { useNavigation } from '@react-navigation/native';
 
 export default function AdminUserScreen() {
   const [users, setUsers] = useState([]);
+  const [filteredUsers, setFilteredUsers] = useState([]);
+  const [searchQuery, setSearchQuery] = useState('');
   const navigation = useNavigation();
 
   const fetchUsers = async () => {
@@ -17,6 +19,7 @@ export default function AdminUserScreen() {
         ...doc.data(),
       }));
       setUsers(usersData);
+      setFilteredUsers(usersData);
     } catch (error) {
       console.error('Error fetching users:', error);
     }
@@ -25,6 +28,14 @@ export default function AdminUserScreen() {
   useEffect(() => {
     fetchUsers();
   }, []);
+
+  const handleSearch = (text) => {
+    setSearchQuery(text);
+    const filtered = users.filter(user =>
+      user.username?.toLowerCase().includes(text.toLowerCase())
+    );
+    setFilteredUsers(filtered);
+  };
 
   const handleViewComments = (user) => {
     navigation.navigate("AdminUserCommentsScreen", { user });
@@ -47,14 +58,23 @@ export default function AdminUserScreen() {
   return (
     <View style={styles.container}>
       <Text style={styles.header}>Users</Text>
+
+      <TextInput
+        placeholder="Search by username..."
+        style={styles.searchInput}
+        value={searchQuery}
+        onChangeText={handleSearch}
+      />
+
       <FlatList
-        data={users}
+        data={filteredUsers}
         keyExtractor={item => item.id}
         renderItem={renderItem}
         ListEmptyComponent={<Text style={{ textAlign: 'center', marginTop: 20 }}>No users found.</Text>}
       />
+
       <TouchableOpacity onPress={() => navigation.goBack()} style={styles.floatingBackButton}>
-              <Text style={styles.floatingBackButtonText}>{'<'} Back</Text>
+        <Text style={styles.floatingBackButtonText}>{'<'} Back</Text>
       </TouchableOpacity>
     </View>
   );
@@ -62,7 +82,14 @@ export default function AdminUserScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#fdfdfd', padding: 20 },
-  header: { fontSize: 22, fontWeight: 'bold', marginBottom: 20 },
+  header: { fontSize: 22, fontWeight: 'bold', marginBottom: 10 },
+  searchInput: {
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 8,
+    padding: 10,
+    marginBottom: 15,
+  },
   card: {
     backgroundColor: '#fff',
     padding: 15,

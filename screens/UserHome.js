@@ -53,9 +53,9 @@ export default function UserHome() {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-      <Text style={styles.headerText}>🏠 หน้าหลัก</Text>
+      <Text style={styles.headerText}>🏠 Home</Text>
       </View>
-      <Text>สถานที่ท่องเที่ยวแนะนำ</Text>
+      <Text> Recommend Place</Text>
       <FlatList
         data={places}
         keyExtractor={(item, index) => index.toString()}
