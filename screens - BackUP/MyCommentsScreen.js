@@ -43,7 +43,7 @@ export default function MyCommentsScreen() {
   return (
   <View style={styles.container}>
 
-    <Text style={styles.title}>My comment 💬</Text>
+    <Text style={styles.title}>คอมเมนต์ของฉัน 💬</Text>
 
     <FlatList
       data={comments}
@@ -51,14 +51,14 @@ export default function MyCommentsScreen() {
       renderItem={({ item }) => (
         <TouchableOpacity onPress={() => handlePress(item.place)}>
           <View style={styles.commentCard}>
-            <Text style={styles.place}>📍 {item.place?.name || 'Location name not found'}</Text>
+            <Text style={styles.place}>📍 {item.place?.name || 'ไม่พบชื่อสถานที่'}</Text>
             <Text>{item.text}</Text>
             <Text style={styles.rating}>⭐ {item.rating}</Text>
           </View>
         </TouchableOpacity>
         
       )} 
-      ListEmptyComponent={<Text style={{ textAlign: 'center' }}>No comments yet.</Text>}
+      ListEmptyComponent={<Text style={{ textAlign: 'center' }}>ยังไม่มีคอมเมนต์</Text>}
     /> 
     <View style={styles.bottomBar}>
     <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>

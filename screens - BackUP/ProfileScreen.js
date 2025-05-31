@@ -21,10 +21,10 @@ export default function ProfileScreen({ navigation }) {
   }, []);
 
   const handleLogout = async () => {
-    Alert.alert("Confirm", "Do you want to log out?", [
-      { text: "cancel", style: "cancel" },
+    Alert.alert("ยืนยัน", "คุณต้องการออกจากระบบหรือไม่?", [
+      { text: "ยกเลิก", style: "cancel" },
       {
-        text: "Log out",
+        text: "ออกจากระบบ",
         style: "destructive",
         onPress: async () => {
           await AsyncStorage.clear();

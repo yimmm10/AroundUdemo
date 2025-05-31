@@ -10,7 +10,7 @@ export default function RegisterScreen({ navigation }) {
 
   const handleRegister = async() => {
     if (!username || !email || !password) {
-      Alert.alert("Please fill in all the information.");
+      Alert.alert("กรุณากรอกข้อมูลให้ครบ");
       return;
     }
 
@@ -20,7 +20,7 @@ export default function RegisterScreen({ navigation }) {
       const querySnapshot = await getDocs(q);
 
       if (!querySnapshot.empty) {
-        Alert.alert("This username already exists. Please choose another name.");
+        Alert.alert("ชื่อผู้ใช้นี้มีอยู่แล้ว กรุณาเลือกชื่ออื่น");
         return;
       }
 
@@ -33,11 +33,11 @@ export default function RegisterScreen({ navigation }) {
         createdAt: new Date()
       });
 
-      Alert.alert("Membership registration successful");
+      Alert.alert("สมัครสมาชิกสำเร็จ");
       navigation.replace("Login");
 
     } catch (error) {
-      Alert.alert("An error occurred.", error.message);
+      Alert.alert("เกิดข้อผิดพลาด", error.message);
     }
   };
 

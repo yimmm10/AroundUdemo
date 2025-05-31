@@ -43,8 +43,8 @@ export default function AdminDetailScreen({ route }) {
     try {
       const placeRef = doc(db, "places", place.id);
       await updateDoc(placeRef, { name, description });
-      Alert.alert("Record successful", "The location information has been updated.", [
-        { text: "OK", onPress: () => navigation.goBack() }
+      Alert.alert("บันทึกสำเร็จ", "ข้อมูลสถานที่ได้รับการอัปเดตแล้ว", [
+        { text: "ตกลง", onPress: () => navigation.goBack() }
       ]);
     } catch (error) {
       console.error("Error updating place:", error);
@@ -65,7 +65,7 @@ export default function AdminDetailScreen({ route }) {
 
   const handleUpdateComment = async () => {
     if (!editingText.trim()) {
-      Alert.alert('Please enter a new message.');
+      Alert.alert('กรุณากรอกข้อความใหม่');
       return;
     }
     try {
@@ -80,10 +80,10 @@ export default function AdminDetailScreen({ route }) {
   };
 
   const handleDeleteComment = async (id) => {
-    Alert.alert("Confirm delete", "Do you want to delete this comment?", [
-      { text: "cancel", style: "cancel" },
+    Alert.alert("ยืนยันลบ", "ต้องการลบความคิดเห็นนี้หรือไม่?", [
+      { text: "ยกเลิก", style: "cancel" },
       {
-        text: "Delete", style: "destructive", onPress: async () => {
+        text: "ลบ", style: "destructive", onPress: async () => {
           await deleteDoc(doc(db, "comments", id));
           setComments(prev => prev.filter(c => c.id !== id));
         }
@@ -95,17 +95,17 @@ export default function AdminDetailScreen({ route }) {
     <ScrollView contentContainerStyle={styles.container}>
       {imageUrl && <Image source={{ uri: imageUrl }} style={styles.image} />}
 
-      <Text style={styles.label}>Place name:</Text>
+      <Text style={styles.label}>ชื่อสถานที่:</Text>
       <TextInput style={styles.input} value={name} onChangeText={setName} />
 
-      <Text style={styles.label}>Details:</Text>
+      <Text style={styles.label}>รายละเอียด:</Text>
       <TextInput style={[styles.input, { height: 100 }]} multiline value={description} onChangeText={setDescription} />
 
       <TouchableOpacity style={styles.saveBtn} onPress={handleUpdatePlace}>
-        <Text style={{ color: '#fff', fontWeight: 'bold' }}>Record location data</Text>
+        <Text style={{ color: '#fff', fontWeight: 'bold' }}>บันทึกข้อมูลสถานที่</Text>
       </TouchableOpacity>
 
-      <Text style={styles.commentTitle}>Comment</Text>
+      <Text style={styles.commentTitle}>ความคิดเห็น</Text>
       {comments.map((item, index) => (
         <View key={index} style={{ marginBottom: 10 }}>
           <Text style={styles.commentUser}>👤 {item.user}</Text>
@@ -117,7 +117,7 @@ export default function AdminDetailScreen({ route }) {
                   style={[styles.sendBtn, { backgroundColor: '#4caf50', flex: 1, marginRight: 5 }]}
                   onPress={handleUpdateComment}
                 >
-                  <Text style={{ color: '#fff', textAlign: 'center' }}>SAVE</Text>
+                  <Text style={{ color: '#fff', textAlign: 'center' }}>บันทึก</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={[styles.sendBtn, { backgroundColor: '#f44336', flex: 1 }]}
@@ -126,7 +126,7 @@ export default function AdminDetailScreen({ route }) {
                     setEditingText('');
                   }}
                 >
-                  <Text style={{ color: '#fff', textAlign: 'center' }}>CANCEL</Text>
+                  <Text style={{ color: '#fff', textAlign: 'center' }}>ยกเลิก</Text>
                 </TouchableOpacity>
               </View>
             </>
@@ -135,10 +135,10 @@ export default function AdminDetailScreen({ route }) {
               <Text style={styles.commentItem}>• {item.text}</Text>
               <View style={{ flexDirection: 'row', marginTop: 5 }}>
                 <TouchableOpacity onPress={() => { setEditingId(item.id); setEditingText(item.text); }}>
-                  <Text style={{ color: 'blue', marginRight: 10 }}>EDIT</Text>
+                  <Text style={{ color: 'blue', marginRight: 10 }}>แก้ไข</Text>
                 </TouchableOpacity>
                 <TouchableOpacity onPress={() => handleDeleteComment(item.id)}>
-                  <Text style={{ color: 'red' }}>DELETE</Text>
+                  <Text style={{ color: 'red' }}>ลบ</Text>
                 </TouchableOpacity>
               </View>
             </>
@@ -147,13 +147,13 @@ export default function AdminDetailScreen({ route }) {
       ))}
 
       <TextInput
-        placeholder="Write your comments..."
+        placeholder="พิมพ์ความคิดเห็น..."
         value={comment}
         onChangeText={setComment}
         style={styles.input}
       />
       <TouchableOpacity onPress={handleAddComment} style={styles.sendBtn}>
-        <Text style={{ color: '#fff' }}>SEND</Text>
+        <Text style={{ color: '#fff' }}>ส่ง</Text>
       </TouchableOpacity>
 
       <View style={styles.bottomBar}>

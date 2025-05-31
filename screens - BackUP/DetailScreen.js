@@ -65,7 +65,7 @@ export default function DetailScreen({ route }) {
               };
             }
           } catch (err) {
-            console.log('Failed to load user profile:', err);
+            console.log('โหลด user profile ไม่สำเร็จ:', err);
           }
           return { ...comment, userImage: null };
         })
@@ -149,7 +149,7 @@ export default function DetailScreen({ route }) {
   const snap = await getDocs(q);
 
   if (!snap.empty) {
-    Alert.alert("Notification", "You can comment only once per location.\nPlease use the edit button to modify the comment.");
+    Alert.alert("แจ้งเตือน", "คุณสามารถคอมเมนต์ได้เพียงครั้งเดียวต่อสถานที่\nกรุณาใช้ปุ่มแก้ไขเพื่อแก้ไขความคิดเห็น");
     return;
   }
 
@@ -177,7 +177,7 @@ export default function DetailScreen({ route }) {
 
       setComments((prev) => prev.filter(c => c.id !== item.id));
     } catch (error) {
-      console.error('Failed to delete review:', error);
+      console.error('ลบรีวิวไม่สำเร็จ:', error);
     }
   };
 
@@ -205,7 +205,7 @@ export default function DetailScreen({ route }) {
 
       {/* ⭐ แสดงคะแนนเฉลี่ย */}
       <View style={styles.avgRatingBox}>
-        <Text style={{ fontWeight: 'bold' }}>Average score:</Text>
+        <Text style={{ fontWeight: 'bold' }}>คะแนนเฉลี่ย:</Text>
         <View style={{ flexDirection: 'row', marginLeft: 6 }}>
           {[1, 2, 3, 4, 5].map(i => (
             <FontAwesome
@@ -220,7 +220,7 @@ export default function DetailScreen({ route }) {
       </View>
 
       {/* ⭐ ให้คะแนน */}
-      <Text style={styles.commentTitle}>Give a score</Text>
+      <Text style={styles.commentTitle}>ให้คะแนน</Text>
       <View style={styles.ratingAndLikeRow}>
         {/* ดาว */}
         <View style={{ flexDirection: 'row' }}>
@@ -244,17 +244,17 @@ export default function DetailScreen({ route }) {
       </View>
 
       <TextInput
-        placeholder="Post a comment..."
+        placeholder="พิมพ์ความคิดเห็น..."
         value={comment}
         onChangeText={setComment}
         style={styles.input}
       />
       <TouchableOpacity onPress={handleAddComment} style={styles.sendBtn}>
-        <Text style={{ color: '#fff' }}>Send</Text>
+        <Text style={{ color: '#fff' }}>ส่ง</Text>
       </TouchableOpacity>
 
       {/* แสดงความคิดเห็นทั้งหมด */}
-      <Text style={styles.commentTitle}>Comment</Text>
+      <Text style={styles.commentTitle}>ความคิดเห็น</Text>
       <FlatList
         data={comments}
         renderItem={({ item }) => (
@@ -292,11 +292,11 @@ export default function DetailScreen({ route }) {
                     
                   }}
                 >
-                  <Text style={{ color: '#007bff' }}>Edit</Text>
+                  <Text style={{ color: '#007bff' }}>แก้ไข</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity onPress={() => handleDeleteComment(item)}>
-                  <Text style={{ color: 'red' }}>Delete</Text>
+                  <Text style={{ color: 'red' }}>ลบ</Text>
                 </TouchableOpacity>
               </View>
             )}

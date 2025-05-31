@@ -18,7 +18,7 @@ export default function EditProfileScreen({ route, navigation }) {
   const pickImage = async () => {
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!permission.granted) {
-      Alert.alert("You need to allow access to the images first.");
+      Alert.alert("ต้องอนุญาตให้เข้าถึงรูปภาพก่อน");
       return;
     }
 
@@ -62,12 +62,12 @@ export default function EditProfileScreen({ route, navigation }) {
           imageUrl // ✅ ใช้ชื่อ field ที่ ProfileScreen รู้จัก
         });
 
-        Alert.alert("The information has been updated successfully.");
+        Alert.alert("อัปเดตข้อมูลเรียบร้อย");
         navigation.goBack();
       }
     } catch (e) {
       console.error("Update failed: ", e);
-      Alert.alert("An error occurred while saving.");
+      Alert.alert("เกิดข้อผิดพลาดในการบันทึก");
     }
   };
 
@@ -78,7 +78,7 @@ export default function EditProfileScreen({ route, navigation }) {
           <Image source={{ uri: image }} style={styles.avatar} />
         ) : (
           <View style={[styles.avatar, { backgroundColor: '#ccc', justifyContent: 'center', alignItems: 'center' }]}>
-            <Text>Select image</Text>
+            <Text>เลือกรูป</Text>
           </View>
         )}
       </TouchableOpacity>
@@ -89,7 +89,7 @@ export default function EditProfileScreen({ route, navigation }) {
       <Text style={styles.label}>Password</Text>
       <TextInput value={password} onChangeText={setPassword} style={styles.input} secureTextEntry />
 
-      <Button title={uploading ? "Uploading..." : "saved"} onPress={handleSave} disabled={uploading} />
+      <Button title={uploading ? "กำลังอัปโหลด..." : "บันทึก"} onPress={handleSave} disabled={uploading} />
     </View>
   );
 }

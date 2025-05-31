@@ -60,10 +60,10 @@ export default function AdminHome() {
   const handleDelete = async (id) => {
     try {
       await deleteDoc(doc(db, 'places', id));
-      Alert.alert("Success", "The place has been deleted.");
+      Alert.alert("สำเร็จ", "สถานที่ถูกลบเรียบร้อย");
     } catch (error) {
       console.error("Error deleting place:", error);
-      Alert.alert("An error occurred.", error.message);
+      Alert.alert("เกิดข้อผิดพลาด", error.message);
     }
   };
 

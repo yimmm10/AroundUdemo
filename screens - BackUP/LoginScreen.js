@@ -10,7 +10,7 @@ export default function LoginScreen({ navigation }) {
 
   const handleLogin = async () => {
     if (!username || !password) {
-      Alert.alert("Please fill in all the information.");
+      Alert.alert("กรุณากรอกข้อมูลให้ครบ");
       return;
     }
 
@@ -20,7 +20,7 @@ export default function LoginScreen({ navigation }) {
       const querySnapshot = await getDocs(q);
 
       if (querySnapshot.empty) {
-        Alert.alert("Username not found.");
+        Alert.alert("ไม่พบชื่อผู้ใช้");
         return;
       }
 
@@ -28,7 +28,7 @@ export default function LoginScreen({ navigation }) {
 
       // เทียบ password
       if (userData.password !== password) {
-        Alert.alert("The password is incorrect.");
+        Alert.alert("รหัสผ่านไม่ถูกต้อง");
         return;
       }
 
@@ -38,7 +38,7 @@ export default function LoginScreen({ navigation }) {
       } else if (userData.role === "user") {
         navigation.replace("SplashScreen");
       } else {
-        Alert.alert("Incorrect role");
+        Alert.alert("บทบาทไม่ถูกต้อง");
       }
 
       // บันทึกข้อมูลลง AsyncStorage
@@ -47,7 +47,7 @@ export default function LoginScreen({ navigation }) {
       await AsyncStorage.setItem('username', userData.username); 
 
     } catch (error) {
-      Alert.alert("An error occurred.", error.message);
+      Alert.alert("เกิดข้อผิดพลาด", error.message);
     }
   };
 

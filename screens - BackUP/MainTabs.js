@@ -32,10 +32,10 @@ export default function MainTabs() {
         }
       })}
     >
-      <Tab.Screen name="UserHome" component={UserHome} options={{ title: 'Home' }} />
-      <Tab.Screen name="ShakeScreen" component={ShakeScreen} options={{ title: 'Shake' }} />
-      <Tab.Screen name="FavoritesScreen" component={FavoritesScreen} options={{ title: 'Favorite' }} />
-      <Tab.Screen name="ProfileScreen" component={ProfileScreen} options={{ title: 'User' }} />
+      <Tab.Screen name="UserHome" component={UserHome} options={{ title: 'หน้าหลัก' }} />
+      <Tab.Screen name="ShakeScreen" component={ShakeScreen} options={{ title: 'เขย่า' }} />
+      <Tab.Screen name="FavoritesScreen" component={FavoritesScreen} options={{ title: 'กดใจ' }} />
+      <Tab.Screen name="ProfileScreen" component={ProfileScreen} options={{ title: 'ข้อมูลผู้ใช้' }} />
     </Tab.Navigator>
   );
 }

@@ -50,7 +50,7 @@ export default function UserHome() {
     const sortedItems = items.sort((a, b) => b.commentCount - a.commentCount);
     setPlaces(items);
   } catch (error) {
-    console.error('An error occurred while loading:', error);
+    console.error('เกิดข้อผิดพลาดในการโหลด:', error);
   }
 };
 
@@ -80,12 +80,12 @@ export default function UserHome() {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-      <Text style={styles.headerText}>🏠 Home</Text>
+      <Text style={styles.headerText}>🏠 หน้าหลัก</Text>
       </View>
-      <Text>Recommended tourist attractions</Text>
+      <Text>สถานที่ท่องเที่ยวแนะนำ</Text>
       
       <TextInput
-        placeholder="Search for a place..."
+        placeholder="ค้นหาสถานที่..."
         value={searchText}
         onChangeText={setSearchText}
         style={styles.searchInput}

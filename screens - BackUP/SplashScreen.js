@@ -11,7 +11,7 @@ export default function SplashScreen({ navigation }) {
   return (
     <View style={styles.container}>
       <Image source={require('../assets/logo.png')} style={styles.logo} />
-      <Text style={styles.description}>Recommend tourist attractions around SUT.</Text>
+      <Text style={styles.description}>แนะนำสถานที่ท่องเที่ยวรอบ มทส.</Text>
     </View>
   );
 }

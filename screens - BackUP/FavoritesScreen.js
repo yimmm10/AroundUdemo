@@ -52,7 +52,7 @@ useEffect(() => {
         return () => unsubscribePlaces();
       });
     } catch (error) {
-      console.error('An error occurred while loading the real-time favorites.:', error);
+      console.error('เกิดข้อผิดพลาดในการโหลด Fev แบบ real-time:', error);
     }
   };
 
@@ -80,7 +80,7 @@ useEffect(() => {
   return (
     <View style={styles.container}>
         <View style={styles.header}>
-        <Text style={styles.headerText}>💖  The place you have in Favorite</Text>
+        <Text style={styles.headerText}>💖 สถานที่ที่คุณกดใจไว้</Text>
         </View>
 
       <FlatList
@@ -90,7 +90,7 @@ useEffect(() => {
         contentContainerStyle={{ padding: 10 }}
         ListEmptyComponent={
           <Text style={{ textAlign: 'center', marginTop: 30 }}>
-            There is still no place you have saved ❤️
+            ยังไม่มีสถานที่ที่คุณกดใจไว้ ❤️
           </Text>
         }
       />

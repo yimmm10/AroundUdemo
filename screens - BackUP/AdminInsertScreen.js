@@ -28,7 +28,7 @@ export default function AdminInsertScreen({ navigation }) {
 
   const handleInsert = async () => {
     if (!name || !description || !time) {
-      Alert.alert("Please fill in all the information.");
+      Alert.alert("กรุณากรอกข้อมูลให้ครบ");
       return;
     }
 
@@ -67,33 +67,33 @@ export default function AdminInsertScreen({ navigation }) {
         picture: pictureFileName
       });
 
-      Alert.alert("Add location successfully");
+      Alert.alert("เพิ่มสถานที่สำเร็จ");
       navigation.goBack();
     } catch (error) {
       console.error("Upload Error:", error);
-      Alert.alert("An error occurred.", "Cannot add data.");
+      Alert.alert("เกิดข้อผิดพลาด", "ไม่สามารถเพิ่มข้อมูลได้");
     }
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.label}>Place name</Text>
+      <Text style={styles.label}>ชื่อสถานที่</Text>
       <TextInput style={styles.input} value={name} onChangeText={setName} />
 
-      <Text style={styles.label}>Details</Text>
+      <Text style={styles.label}>รายละเอียด</Text>
       <TextInput style={[styles.input, { height: 80 }]} multiline value={description} onChangeText={setDescription} />
 
-      <Text style={styles.label}>Opening/Closing Time</Text>
+      <Text style={styles.label}>เวลาเปิด/ปิด</Text>
       <TextInput style={styles.input} value={time} onChangeText={setTime} />
 
       <TouchableOpacity style={styles.imagePicker} onPress={pickImage}>
-        <Text style={{ color: '#fff' }}>{image ? 'Change the picture' : 'Select an image'}</Text>
+        <Text style={{ color: '#fff' }}>{image ? 'เปลี่ยนรูปภาพ' : 'เลือกรูปภาพ'}</Text>
       </TouchableOpacity>
 
       {image && <Image source={{ uri: image }} style={styles.preview} />}
 
       <TouchableOpacity style={styles.saveBtn} onPress={handleInsert}>
-        <Text style={{ color: '#fff', fontWeight: 'bold' }}>Record of places</Text>
+        <Text style={{ color: '#fff', fontWeight: 'bold' }}>บันทึกสถานที่</Text>
       </TouchableOpacity>
 
       <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>

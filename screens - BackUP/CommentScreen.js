@@ -32,7 +32,7 @@ export default function CommentScreen({ route, navigation }) {
 
   const handleSave = async () => {
     if (!comment || rating === 0) {
-      Alert.alert("Notification", "Please rate and provide your feedback.");
+      Alert.alert("แจ้งเตือน", "กรุณาให้คะแนนและกรอกความคิดเห็น");
       return;
     }
 
@@ -50,13 +50,13 @@ export default function CommentScreen({ route, navigation }) {
       await addDoc(collection(db, "comments"), payload);
     }
 
-    Alert.alert("Success", "Comment has been recorded successfully.");
+    Alert.alert("สำเร็จ", "บันทึกความคิดเห็นเรียบร้อยแล้ว");
     navigation.goBack();
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Write a comment for {place.name}</Text>
+      <Text style={styles.title}>เขียนความคิดเห็นสำหรับ {place.name}</Text>
 
       <View style={styles.stars}>
         {[1, 2, 3, 4, 5].map(i => (
@@ -73,7 +73,7 @@ export default function CommentScreen({ route, navigation }) {
 
       <TextInput
         style={styles.input}
-        placeholder="Write your comments..."
+        placeholder="พิมพ์ความคิดเห็น..."
         multiline
         numberOfLines={4}
         value={comment}

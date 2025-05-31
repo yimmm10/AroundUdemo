@@ -27,7 +27,7 @@ export default function ShakeToSuggestScreen() {
             const imageRef = ref(storage, imagePath);
             imageUrl = await getDownloadURL(imageRef);
           } catch (error) {
-            console.error('Failed to load the image:', error);
+            console.error('โหลดรูปไม่สำเร็จ:', error);
           }
   
           return {
@@ -79,7 +79,7 @@ export default function ShakeToSuggestScreen() {
   return (
     <View style={styles.container}>
       <Animated.View style={{ transform: [{ scale: shakeAnim }] }}>
-        <Text style={styles.title}>Shake the smartphone to randomize locations around SUT.</Text>
+        <Text style={styles.title}>เขย่าเครื่องเพื่อสุ่มสถานที่รอบ มทส.</Text>
       </Animated.View>
 
       {selectedPlace && (
@@ -88,7 +88,7 @@ export default function ShakeToSuggestScreen() {
           <Text style={styles.name}>{selectedPlace.name}</Text>
           <Text style={styles.desc}>{selectedPlace.description}</Text>
           <TouchableOpacity style={styles.button} onPress={handleDetail}>
-            <Text style={styles.buttonText}>View details</Text>
+            <Text style={styles.buttonText}>ดูรายละเอียด</Text>
           </TouchableOpacity>
         </View>
       )}
